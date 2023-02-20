@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BarcodeLib;
+using System.IO.Ports;
+using System.Net.Http.Headers;
+using System.Threading;
 
 namespace proyectoTicket
 {
@@ -35,6 +38,10 @@ namespace proyectoTicket
 
         private PrintDocument doc = new PrintDocument();
         private PrintPreviewDialog vista = new PrintPreviewDialog();
+        private PrintEventArgs end = new PrintEventArgs();
+        //private SerialPort SpPorts;
+        //private string bufferOut;
+
 
         public void print(crearTicket p)
         {
@@ -42,7 +49,15 @@ namespace proyectoTicket
             doc.PrintPage += new PrintPageEventHandler(printticket);
             vista.Document = doc;
             vista.Show();
+            //doc.EndPrint
             //doc.Print();
+
+            //SpPorts.DiscardOutBuffer();
+            //Thread.Sleep(10000);
+            //Console.WriteLine("AQUI FUE Y.");
+            //bufferOut = "Y";
+            //Thread.Sleep(10000);
+            //SpPorts.Write(bufferOut);
         }
 
         public void printticket(object sender, PrintPageEventArgs e)
