@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using BarcodeLib;
+using AForge.Video.DirectShow;
+using AForge.Video;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace proyectoTicket
 {
     public partial class Form1 : Form
     {
+        public string Path = @"C:\\Users\\DELL\\Desktop\\proyectoTicket\\proyectoTicket\\images";
+        private bool devices = false; //cargar dispositivos
+        private FilterInfoCollection myDevices; //dispositivos de video
+        private VideoCaptureDevice webCam;
 
         private string bufferIn;
         private string bufferOut;
@@ -30,6 +29,7 @@ namespace proyectoTicket
         private void Form1_Load(object sender, EventArgs e)
         {
             this.ResertForm();
+            this.SearchDevices();
         }
 
         public void ResertForm()
@@ -45,34 +45,12 @@ namespace proyectoTicket
             this.portConnected = "";
 
         }
-        private void btnprint_Click_1(object sender, EventArgs e)
+        private void SendToPrint()
         {
             crearTicket ticket = new crearTicket();
 
             ticket.print(ticket);
-        }
-
-        private void BtnSendData_Click(object sender, EventArgs e)
-        {
-                if (this.portConnected == "")
-                    return;
-
-                try
-                {
-
-                    SpPorts.DiscardOutBuffer();
-                    bufferOut = "Y";
-                    Thread.Sleep(10000);
-                    SpPorts.Write(bufferOut);
-
-                }
-                catch (Exception ex)
-                {
-                    ResertForm();
-                    //MessageBox.Show(ex.Message);
-                    Console.WriteLine("Not Send Data.", ex);
-                }
-
+            Thread.Sleep(15000);
         }
 
         private void SendY()
@@ -86,30 +64,7 @@ namespace proyectoTicket
                 SpPorts.DiscardOutBuffer();
                 bufferOut = "Y";
                 Console.WriteLine("AQUI FUE Y.");
-                Thread.Sleep(10000);
-                SpPorts.Write(bufferOut);
-
-            }
-            catch (Exception ex)
-            {
-                ResertForm();
-                //MessageBox.Show(ex.Message);
-                Console.WriteLine("Not Send Data.", ex);
-            }
-        }
-
-        private void SendZ()
-        {
-            if (this.portConnected == "")
-                return;
-
-            try
-            {
-                Console.WriteLine("ESPERA.");
-                Thread.Sleep(10000);
-                SpPorts.DiscardOutBuffer();
-                bufferOut = "Z";
-                Console.WriteLine("AQUI FUE Z.");
+                Thread.Sleep(5000);
                 SpPorts.Write(bufferOut);
 
             }
@@ -275,52 +230,84 @@ namespace proyectoTicket
         private void SetResponse()
         {
             string dataIn = SpPorts.ReadExisting();
-            crearTicket ticket = new crearTicket();
-            ticket.print(ticket);
+            this.SendToPrint();
             Console.WriteLine("AQUI FUE PRINT.");
             //EJECUTA Y (SUBIR BARRERA)
-            this.SendY();
-            //EJECUTA Z (BAJAR BARRERA)
-            this.SendZ();
+            this.SendY();            
 
         }
+        public void SearchDevices()
+        {
+            //buscar dispositivos installados en el aquipo
 
-        private void CboPortList_SelectedIndexChanged(object sender, EventArgs e)
+            myDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+            if (myDevices.Count > 0)
+            {
+                devices = true;
+                for (int i = 0; i < myDevices.Count; i++)
+                    cBoxDevices.Items.Add(myDevices[i].Name.ToString());
+
+                cBoxDevices.Text = myDevices[0].Name.ToString();
+            }
+            else
+            {
+                devices = false;
+            }
+        }
+        public void ClosedWebCam()
+        {
+            if (webCam != null && webCam.IsRunning)
+            {
+                webCam.SignalToStop();
+                webCam = null;
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //captar video deberia ir el metodo donde capta la i 
+            this.ClosedWebCam();
+            int i = cBoxDevices.SelectedIndex;
+            string nameVideo = myDevices[i].MonikerString;
+            webCam = new VideoCaptureDevice(nameVideo);
+            webCam.NewFrame += new NewFrameEventHandler(CapPhoto);
+            webCam.Start();
+        }
+        private void CapPhoto(object sender, NewFrameEventArgs eventArgs)
+        {
+            Bitmap Img = (Bitmap)eventArgs.Frame.Clone();
+            pictureBox2.Image = Img;
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void CboBaudRate_SelectedIndexChanged(object sender, EventArgs e)
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-
+            this.ClosedWebCam();
         }
 
-        private void LblBaudRate_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
-
+            if (webCam != null && webCam.IsRunning)
+            {
+                pictureBox3.Image = pictureBox2.Image;
+                pictureBox3.Image.Save(Path+"image.jpg", ImageFormat.Jpeg);
+            }
         }
 
-        private void InputData_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void InputResponse_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void LblInputData_Click(object sender, EventArgs e)
+        private void pictureBox3_Click(object sender, EventArgs e)
         {
 
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox1_Click_1(object sender, EventArgs e)
         {
 
         }

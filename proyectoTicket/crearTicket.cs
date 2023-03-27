@@ -1,46 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing.Printing;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using BarcodeLib;
-using System.IO.Ports;
-using System.Net.Http.Headers;
-using System.Threading;
 
 namespace proyectoTicket
 {
     public class crearTicket
     {
-        //public string document { get; set; }
-
-        //public string rif { get; set; }
-        //public string corporation { get; set; }
-        //public string company { get; set; }
-
-        //public string receiptNumber { get; set; }
-        //public string inputBox { get; set; }
-        //public string entryDate { get; set; }
-        //public string entryTime { get; set; }
-
-        //public string codBar { get; set; }
-
-        //public string company2 { get; set; }
-        //public string address { get; set; }
-
-        //public string phoneNumber { get; set; }
 
 
         public Image logo { get; set; }
 
         private PrintDocument doc = new PrintDocument();
         private PrintPreviewDialog vista = new PrintPreviewDialog();
-        private PrintEventArgs end = new PrintEventArgs();
-        //private SerialPort SpPorts;
-        //private string bufferOut;
 
 
         public void print(crearTicket p)
@@ -48,16 +21,9 @@ namespace proyectoTicket
             doc.PrinterSettings.PrinterName = doc.DefaultPageSettings.PrinterSettings.PrinterName;
             doc.PrintPage += new PrintPageEventHandler(printticket);
             vista.Document = doc;
-            vista.Show();
-            //doc.EndPrint
-            //doc.Print();
+            //vista.Show();
+            doc.Print();
 
-            //SpPorts.DiscardOutBuffer();
-            //Thread.Sleep(10000);
-            //Console.WriteLine("AQUI FUE Y.");
-            //bufferOut = "Y";
-            //Thread.Sleep(10000);
-            //SpPorts.Write(bufferOut);
         }
 
         public void printticket(object sender, PrintPageEventArgs e)
